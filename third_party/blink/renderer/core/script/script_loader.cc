@@ -1442,6 +1442,11 @@ String ScriptLoader::GetScriptText() const {
   if (child_text_content == script_text_internal_slot) {
     return child_text_content;
   }
+  // TizenTube: the injected first-party userscript sets its text directly and
+  // is exempt from Trusted Types (the page may require 'TrustedScript').
+  if (element_->IsTizenTubeInjected()) {
+    return child_text_content;
+  }
   return GetStringForScriptExecution(child_text_content,
                                      element_->GetScriptElementType(),
                                      element_->GetExecutionContext());

@@ -20,5 +20,16 @@ blink_modules_sources("h5vcc_tizen_tube") {
     "h_5_vcc_tizen_tube.h",
   ]
 
-  deps = [ "//cobalt/browser/h5vcc_tizentube/public/mojom:mojom_blink", "//starboard/android/shared:starboard_platform" ]
+  deps = [ "//cobalt/browser/h5vcc_tizentube/public/mojom:mojom_blink" ]
+
+  # Provides the generated TizenTube userscript version constant (header include
+  # dir must propagate, hence public_deps).
+  public_deps = [ "//cobalt/tizentube:generate_tizentube_version" ]
+
+  # Android-only: h_5_vcc_tizen_tube.cc calls into Starboard's Android bridge
+  # under BUILDFLAG(IS_ANDROID). Guarded so non-Android (e.g. linux-x64x11) gen
+  # doesn't pull //build/config/android/* into the buildgraph.
+  if (is_android) {
+    deps += [ "//starboard/android/shared:starboard_platform" ]
+  }
 }

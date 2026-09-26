@@ -26,4 +26,6 @@ source_set("h5vcc_tizentube") {
     "//content/public/browser",
     "//mojo/public/cpp/bindings",
   ]
+
+  public_deps = [ "//cobalt/tizentube:generate_tizentube_version" ]
 }

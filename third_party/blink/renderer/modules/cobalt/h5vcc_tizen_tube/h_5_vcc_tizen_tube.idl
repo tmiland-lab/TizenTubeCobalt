@@ -22,6 +22,8 @@ interface H5vccTizenTube {
   [CallWith=ScriptState, RaisesException]
   DOMString GetVersion();
   [CallWith=ScriptState, RaisesException]
+  DOMString GetUserscriptVersion();
+  [CallWith=ScriptState, RaisesException]
   DOMString GetArchitecture();
   void SetFrameRate(float frame_rate);
   void EnterPIP();

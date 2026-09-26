@@ -576,6 +576,14 @@ bool ContentSecurityPolicy::AllowInline(
     return true;
   }
 
+  // TizenTube: the userscript bundle is injected as a first-party inline
+  // script (see Document::ImplicitClose). Allow it to run despite YouTube's
+  // CSP by keying off the marker attribute we set on the injected element.
+  if (is_script && element &&
+      element->hasAttribute(AtomicString("data-tizentube"))) {
+    return true;
+  }
+
   Vector<network::mojom::blink::CSPHashSourcePtr> csp_hash_values;
   FillInCSPHashValues(content, hash_algorithms_used_, csp_hash_values);
 
@@ -903,13 +911,14 @@ bool ContentSecurityPolicy::AllowFromSource(
 
   CSPCheckResult result = CSPCheckResult::Allowed();
 
-  // Add an allow list array
+  // TizenTube: hosts the vendored userscript fetches at runtime. The bundle
+  // itself is embedded at build time (no longer fetched from cdn.jsdelivr.net),
+  // so that host has been dropped from the allow list.
   const Vector<std::string> kAllowList = {
-      "cdn.jsdelivr.net",
-      "api.github.com",
-      "sponsor.ajay.app",
-      "dearrow-thumb.ajay.app",
-      "tizentube.app"
+      "api.github.com",          // userscript update check
+      "sponsor.ajay.app",        // SponsorBlock API
+      "dearrow-thumb.ajay.app",  // DeArrow thumbnails
+      "dearrow.ajay.app",        // DeArrow API
   };
 
   if (kAllowList.Contains(url.Host().Utf8())) {

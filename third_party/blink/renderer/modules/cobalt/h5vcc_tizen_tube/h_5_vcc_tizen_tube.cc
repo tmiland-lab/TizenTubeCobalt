@@ -14,6 +14,7 @@
 
 #include "third_party/blink/renderer/modules/cobalt/h5vcc_tizen_tube/h_5_vcc_tizen_tube.h"
 
+#include "cobalt/tizentube/embedded_resources/tizentube_version.h"
 #include "third_party/blink/public/platform/browser_interface_broker_proxy.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
@@ -58,6 +59,13 @@ WTF::String H5vccTizenTube::GetVersion(
 #else
   return "";
 #endif // BUILDFLAG(IS_ANDROID)
+}
+
+WTF::String H5vccTizenTube::GetUserscriptVersion(
+    ScriptState* script_state,
+    ExceptionState& exception_state) {
+  // Version of the vendored userscript bundle, stamped at build time.
+  return String::FromUTF8(TizenTubeUserscript::kVersion);
 }
 
 WTF::String H5vccTizenTube::GetArchitecture(
@@ -150,7 +158,7 @@ bool H5vccTizenTube::HasSystemFeature(
     return false;
   }
 
-  #ifdef BUILDFLAG(IS_ANDROID)
+  #if BUILDFLAG(IS_ANDROID)
     auto* env = base::android::AttachCurrentThread();
     starboard::StarboardBridge* bridge = starboard::StarboardBridge::GetInstance();
     bool has_feature = bridge->HasSystemFeature(env, feature_name.Utf8().data());

@@ -53,6 +53,9 @@ class MODULES_EXPORT H5vccTizenTube final
   WTF::String GetVersion(ScriptState* script_state,
                                       ExceptionState& exception_state);
 
+  WTF::String GetUserscriptVersion(ScriptState* script_state,
+                                   ExceptionState& exception_state);
+
   WTF::String GetArchitecture(ScriptState* script_state,
                              ExceptionState& exception_state);
 

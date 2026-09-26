@@ -393,6 +393,9 @@ component("core") {
     ":generate_eventhandler_names",
     ":make_deprecation_info",
     "//base",
+
+    # TizenTube: embeds the vendored userscript bundle (see document.cc).
+    "//cobalt/tizentube:tizentube_embedded",
     "//components/attribution_reporting",
     "//components/attribution_reporting:mojom_blink",
     "//components/paint_preview/common",
@@ -497,6 +500,9 @@ blink_core_sources("core_hot") {
 
   deps = [
     ":buildflags",
+
+    # TizenTube: embeds the vendored userscript bundle (see dom/document.cc).
+    "//cobalt/tizentube:tizentube_embedded",
     "//components/miracle_parameter/common",
     "//services/metrics/public/cpp:ukm_builders",
     "//third_party/blink/public:image_resources_grit",
@@ -1499,8 +1505,8 @@ source_set("unit_tests") {
   sources += rebase_path(blink_core_tests_workers, "", "workers")
   sources += rebase_path(blink_core_tests_xml, "", "xml")
   sources += rebase_path(blink_core_tests_xmlhttprequest, "", "xmlhttprequest")
-  
-  if (is_cobalt){ 
+
+  if (is_cobalt) {
     sources += rebase_path(blink_core_tests_cobalt, "", "cobalt")
   }
 

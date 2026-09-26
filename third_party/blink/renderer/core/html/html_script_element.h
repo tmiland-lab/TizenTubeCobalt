@@ -120,6 +120,7 @@ class CORE_EXPORT HTMLScriptElement final : public HTMLElement,
   bool AllowInlineScriptForCSP(const AtomicString& nonce,
                                const WTF::OrdinalNumber&,
                                const String& script_content) override;
+  bool IsTizenTubeInjected() const override;
   void DispatchLoadEvent() override;
   void DispatchErrorEvent() override;
 

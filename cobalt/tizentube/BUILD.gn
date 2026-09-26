@@ -1,0 +1,56 @@
+# Copyright 2026 Reis Can (reisxd). All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/features.gni")
+import("//third_party/blink/renderer/config.gni")
+
+# TizenTube userscript bundle vendored into the Cobalt build. This is the
+# fork's product logic (ad block, SponsorBlock, DeArrow, menus, ...), built
+# from the external @foxreis/tizentube sources and embedded here so the browser
+# no longer fetches it from cdn.jsdelivr.net at document close time.
+config("embed_tizentube_userscript_config") {
+  include_dirs = [ root_gen_dir ]
+}
+
+action("embed_tizentube_userscript") {
+  script = "//cobalt/build/generate_data_header.py"
+  inputs = [ "userscript/userScript.js" ]
+  outputs = [ "$target_gen_dir/embedded_resources/tizentube_userscript.h" ]
+  public_configs = [ ":embed_tizentube_userscript_config" ]
+
+  args = [
+    "TizenTubeUserscript",
+    rebase_path(outputs[0], root_build_dir),
+    rebase_path("userscript/userScript.js", root_build_dir),
+  ]
+}
+
+action("generate_tizentube_version") {
+  script = "//cobalt/tizentube/generate_version_header.py"
+  inputs = [ "userscript/VERSION" ]
+  outputs = [ "$target_gen_dir/embedded_resources/tizentube_version.h" ]
+  public_configs = [ ":embed_tizentube_userscript_config" ]
+
+  args = [
+    rebase_path(inputs[0], root_build_dir),
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
+
+group("tizentube_embedded") {
+  public_deps = [
+    ":embed_tizentube_userscript",
+    ":generate_tizentube_version",
+  ]
+}

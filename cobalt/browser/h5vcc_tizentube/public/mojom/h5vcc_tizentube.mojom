@@ -17,6 +17,7 @@ module h5vcc_tizentube.mojom;
 interface H5vccTizentube {
   InstallAppFromURL(string url) => (bool success);
   GetVersion() => (string version);
+  GetUserscriptVersion() => (string version);
   GetArchitecture() => (string architecture);
   GetBrandAndModel() => (string brand_and_model);
   SetFrameRate(float frame_rate);

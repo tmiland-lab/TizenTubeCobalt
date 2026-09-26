@@ -25,6 +25,7 @@
 #include <variant>
 
 #include "cobalt/browser/global_features.h"
+#include "cobalt/tizentube/embedded_resources/tizentube_version.h"
 
 namespace h5vcc_tizentube {
 #if BUILDFLAG(IS_ANDROID)
@@ -65,6 +66,11 @@ void H5vccTizentubeImpl::GetVersion(GetVersionCallback callback) {
     return;
   #endif  // BUILDFLAG(IS_ANDROID)
   std::move(callback).Run("1.0.0"); // Placeholder implementation
+}
+
+void H5vccTizentubeImpl::GetUserscriptVersion(
+    GetUserscriptVersionCallback callback) {
+  std::move(callback).Run(TizenTubeUserscript::kVersion);
 }
 
 void H5vccTizentubeImpl::GetArchitecture(GetArchitectureCallback callback) {

@@ -48,6 +48,7 @@
 #include "cc/animation/animation_timeline.h"
 #include "cc/input/overscroll_behavior.h"
 #include "cc/input/scroll_snap_data.h"
+#include "cobalt/tizentube/embedded_resources/tizentube_userscript.h"
 #include "mojo/public/cpp/bindings/lib/wtf_hash_util.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/remote.h"
@@ -4011,6 +4012,13 @@ void Document::ImplicitClose() {
   load_event_progress_ = kLoadEventInProgress;
 
   // TizenTube userscript injection.
+  //
+  // The userscript bundle is embedded at build time (see
+  // //cobalt/tizentube:embed_tizentube_userscript) instead of being fetched
+  // from cdn.jsdelivr.net, so injection no longer depends on network access
+  // and can be patched first-party. It is injected as an inline script and
+  // must therefore bypass CSP inline-script checks (YouTube ships a strict
+  // policy); we do that via the per-document override below.
   if (IsA<HTMLDocument>(this)) {
     Element* script_container = head();
 
@@ -4021,12 +4029,16 @@ void Document::ImplicitClose() {
     if (script_container) {
       auto* script = CreateRawElement(html_names::kScriptTag);
 
-      double epoch_time = base::Time::Now().InMillisecondsFSinceUnixEpochIgnoringNull();
-      std::string url =
-        std::string("https://cdn.jsdelivr.net/npm/@foxreis/tizentube/dist/userScript.js?v=")
-        + std::to_string(epoch_time);
+      // Marker consumed by ContentSecurityPolicy::AllowInline to let this
+      // first-party inline script bypass the page's CSP.
+      script->setAttribute(AtomicString("data-tizentube"),
+                           AtomicString(""));
 
-      script->setAttribute(html_names::kSrcAttr, AtomicString(url.c_str()));
+      const char* bundle =
+          reinterpret_cast<const char*>(TizenTubeUserscript::userScript_js);
+      const size_t bundle_size = sizeof(TizenTubeUserscript::userScript_js);
+      script->AppendChild(
+          createTextNode(String::FromUTF8(std::string_view(bundle, bundle_size))));
 
       script_container->appendChild(script);
     }

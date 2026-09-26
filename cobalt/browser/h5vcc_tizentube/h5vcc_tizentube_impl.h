@@ -43,6 +43,7 @@ class H5vccTizentubeImpl
 
   void InstallAppFromURL(const std::string& url, InstallAppFromURLCallback callback) override;
   void GetVersion(GetVersionCallback callback) override;
+  void GetUserscriptVersion(GetUserscriptVersionCallback callback) override;
   void GetArchitecture(GetArchitectureCallback callback) override;
   void GetBrandAndModel(GetBrandAndModelCallback callback) override;
   void SetFrameRate(float frame_rate) override;

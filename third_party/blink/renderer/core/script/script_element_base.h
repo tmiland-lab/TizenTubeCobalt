@@ -80,6 +80,12 @@ class CORE_EXPORT ScriptElementBase : public GarbageCollectedMixin {
                                        const WTF::OrdinalNumber&,
                                        const String& script_content) = 0;
 
+  // TizenTube: true when this element is the first-party userscript injected
+  // by Document::ImplicitClose. Such scripts are exempted from Trusted Types
+  // enforcement (the document may require 'TrustedScript' assignment, which
+  // would otherwise refuse our direct text modification).
+  virtual bool IsTizenTubeInjected() const { return false; }
+
   // GetDocument() is "element document", to which the script element belongs
   // and a parser is attached (in the case of parser-inserted scripts).
   // GetExecutionContext() is "context window" (LocalDOMWindow),

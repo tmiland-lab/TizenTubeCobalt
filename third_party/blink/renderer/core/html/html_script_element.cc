@@ -307,6 +307,10 @@ const AtomicString& HTMLScriptElement::GetNonceForElement() const {
                                                          : g_null_atom;
 }
 
+bool HTMLScriptElement::IsTizenTubeInjected() const {
+  return hasAttribute(AtomicString("data-tizentube"));
+}
+
 bool HTMLScriptElement::AllowInlineScriptForCSP(
     const AtomicString& nonce,
     const WTF::OrdinalNumber& context_line,
