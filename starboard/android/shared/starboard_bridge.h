@@ -113,6 +113,7 @@ class StarboardBridge {
   std::string GetBrandAndModel(JNIEnv* env) const;
   void SetFrameRate(JNIEnv* env, float frame_rate) const;
   void EnterPIP(JNIEnv* env) const;
+  void SetBackgroundPlaybackEnabled(JNIEnv* env, bool enabled) const;
   bool HasSystemFeature(JNIEnv* env, const char* feature_name) const;
 
   void SetStartupMilestone(jint milestone) const;

@@ -101,6 +101,16 @@ public class StarboardBridge {
   private volatile boolean mApplicationStopped;
   private volatile boolean mApplicationStarted;
 
+  // When true, playback keeps running while the app is in the background: the
+  // activity stop path does not suspend the native app, and a foreground media
+  // service keeps the process alive. Toggled from the web app via
+  // SetBackgroundPlaybackEnabled (TizenTube).
+  private static volatile boolean sBackgroundPlaybackEnabled = false;
+
+  public static boolean isBackgroundPlaybackEnabled() {
+    return sBackgroundPlaybackEnabled;
+  }
+
   private long mAppStartTimestamp = 0;
 
   private final Map<String, CobaltService.Factory> mCobaltServiceFactories = new HashMap<>();
@@ -792,6 +802,15 @@ public class StarboardBridge {
   }
 
   @CalledByNative
+  protected void setBackgroundPlaybackEnabled(boolean enabled) {
+    Log.i(TAG, "setBackgroundPlaybackEnabled: " + enabled);
+    sBackgroundPlaybackEnabled = enabled;
+    if (!enabled) {
+      BackgroundPlaybackService.stop(mAppContext);
+    }
+  }
+
+  @CalledByNative
   protected void setFrameRate(float frameRate) {
     if (Build.VERSION.SDK_INT < 30) {
       return;
@@ -840,9 +859,7 @@ public class StarboardBridge {
   }
 
   @CalledByNative
-  protected void enterPIP() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      Activity activity = mActivityHolder.get();
+  protected void enterPIP() {    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {      Activity activity = mActivityHolder.get();
       if (activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
         Rational aspectRatio = new Rational(1920, 1080);
             PictureInPictureParams params = new PictureInPictureParams.Builder()

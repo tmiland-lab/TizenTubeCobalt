@@ -27,6 +27,7 @@ interface H5vccTizenTube {
   DOMString GetArchitecture();
   void SetFrameRate(float frame_rate);
   void EnterPIP();
+  void SetBackgroundPlaybackEnabled(boolean enabled);
   [CallWith=ScriptState, RaisesException]
   boolean SetUserAgent(DOMString user_agent);
   [CallWith=ScriptState, RaisesException]

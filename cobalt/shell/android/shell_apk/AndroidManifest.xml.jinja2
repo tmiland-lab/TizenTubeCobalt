@@ -155,6 +155,12 @@
             android:name="android.support.FILE_PROVIDER_PATHS"
             android:resource="@xml/file_paths" />
     </provider>
+
+    <!-- Keeps the process alive for background media playback (TizenTube). -->
+    <service
+        android:name="dev.cobalt.coat.BackgroundPlaybackService"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback" />
     </application>
     {% block extra_root_definitions %}
     {% endblock %}

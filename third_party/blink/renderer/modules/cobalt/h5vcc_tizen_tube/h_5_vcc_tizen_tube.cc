@@ -112,6 +112,14 @@ void H5vccTizenTube::EnterPIP() {
   #endif // BUILDFLAG(IS_ANDROID)
 }
 
+void H5vccTizenTube::SetBackgroundPlaybackEnabled(bool enabled) {
+#if BUILDFLAG(IS_ANDROID)
+  auto* env = base::android::AttachCurrentThread();
+  starboard::StarboardBridge* bridge = starboard::StarboardBridge::GetInstance();
+  bridge->SetBackgroundPlaybackEnabled(env, enabled);
+#endif  // BUILDFLAG(IS_ANDROID)
+}
+
 bool H5vccTizenTube::EnsureReceiverIsBound() {
   if (service_.is_bound()) {
     return true;

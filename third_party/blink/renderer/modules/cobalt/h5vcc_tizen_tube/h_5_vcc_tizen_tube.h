@@ -61,6 +61,7 @@ class MODULES_EXPORT H5vccTizenTube final
 
   void SetFrameRate(float frame_rate);
   void EnterPIP();
+  void SetBackgroundPlaybackEnabled(bool enabled);
   bool SetUserAgent(ScriptState* script_state,
                     const WTF::String& user_agent,
                     ExceptionState& exception_state);

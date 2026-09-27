@@ -475,6 +475,13 @@ void StarboardBridge::EnterPIP(JNIEnv* env) const {
   Java_StarboardBridge_enterPIP(env, j_starboard_bridge_);
 }
 
+void StarboardBridge::SetBackgroundPlaybackEnabled(JNIEnv* env,
+                                                   bool enabled) const {
+  SB_CHECK(env);
+  Java_StarboardBridge_setBackgroundPlaybackEnabled(env, j_starboard_bridge_,
+                                                    enabled);
+}
+
 bool StarboardBridge::HasSystemFeature(JNIEnv* env, const char* feature_name) const {
   SB_CHECK(env);
   return Java_StarboardBridge_hasSystemFeature(

@@ -600,6 +600,16 @@ public abstract class CobaltActivity extends Activity {
 
   @Override
   protected void onStop() {
+    // When background playback is enabled, keep the native app alive and the
+    // page visible so media keeps playing, and hold the process up with a
+    // foreground service. Otherwise fall through to the normal suspend path.
+    if (StarboardBridge.isBackgroundPlaybackEnabled()) {
+      Log.i(TAG, "onStop: background playback enabled, staying alive.");
+      BackgroundPlaybackService.start(this);
+      super.onStop();
+      return;
+    }
+
     getStarboardBridge().onActivityStop(this);
     super.onStop();
 
