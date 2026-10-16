@@ -340,6 +340,8 @@ public class CobaltMediaSession implements ArtworkLoader.Callback {
         playbackState.getPosition(),
         playbackState.getPlaybackSpeed(),
         playbackState.getLastPositionUpdateTime());
+
+    notifyBackgroundPlaybackService();
   }
 
   private void resetMetaData() {
@@ -358,6 +360,7 @@ public class CobaltMediaSession implements ArtworkLoader.Callback {
 
     if (mMetadata == null) {
       resetMetaData();
+      notifyBackgroundPlaybackService();
       return;
     }
 
@@ -383,6 +386,23 @@ public class CobaltMediaSession implements ArtworkLoader.Callback {
         metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST),
         metadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM),
         metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+
+    notifyBackgroundPlaybackService();
+  }
+
+  // TizenTube: keep the background-playback notification (title/artist/artwork
+  // and play/pause) in sync with the current media session.
+  private void notifyBackgroundPlaybackService() {
+    if (mMediaSession == null || mMetadata == null) {
+      return;
+    }
+    BackgroundPlaybackService.update(
+        mContext,
+        mMetadata.getTitle(),
+        mMetadata.getArtist(),
+        mArtworkImage,
+        !mIsPaused,
+        mMediaSession.getSessionToken());
   }
 
   private long computeMediaSessionActions() {

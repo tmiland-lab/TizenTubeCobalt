@@ -805,9 +805,27 @@ public class StarboardBridge {
   protected void setBackgroundPlaybackEnabled(boolean enabled) {
     Log.i(TAG, "setBackgroundPlaybackEnabled: " + enabled);
     sBackgroundPlaybackEnabled = enabled;
-    if (!enabled) {
+    if (enabled) {
+      requestNotificationPermission();
+    } else {
       BackgroundPlaybackService.stop(mAppContext);
     }
+  }
+
+  // The background-playback Now Playing notification needs POST_NOTIFICATIONS on
+  // Android 13+. Request it lazily when the feature is first enabled.
+  private void requestNotificationPermission() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+      return;
+    }
+    Activity activity = mActivityHolder.get();
+    if (activity == null
+        || activity.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+            == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+      return;
+    }
+    activity.requestPermissions(
+        new String[] {android.Manifest.permission.POST_NOTIFICATIONS}, 0);
   }
 
   @CalledByNative
