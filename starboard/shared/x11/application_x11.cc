@@ -700,12 +700,42 @@ ApplicationX11::~ApplicationX11() {
   SbAudioSinkImpl::TearDown();
 }
 
+namespace {
+// TizenTube: ask the window manager to put the desktop window into fullscreen
+// mode, so the TV UI fills the whole screen instead of leaving the window
+// decorations (and the resulting shrink of the viewport) in place. Pass
+// --no-fullscreen to keep the windowed behaviour.
+void RequestFullscreen(Display* display, Window window) {
+  const Atom wm_state = XInternAtom(display, "_NET_WM_STATE", False);
+  const Atom fullscreen =
+      XInternAtom(display, "_NET_WM_STATE_FULLSCREEN", False);
+  if (wm_state == None || fullscreen == None) {
+    return;
+  }
+  XEvent event = {0};
+  event.type = ClientMessage;
+  event.xclient.window = window;
+  event.xclient.message_type = wm_state;
+  event.xclient.format = 32;
+  event.xclient.data.l[0] = 1;  // _NET_WM_STATE_ADD
+  event.xclient.data.l[1] = fullscreen;
+  event.xclient.data.l[3] = 1;  // Source indication: a normal application.
+  XSendEvent(display, DefaultRootWindow(display), False,
+             SubstructureRedirectMask | SubstructureNotifyMask, &event);
+  XFlush(display);
+}
+}  // namespace
+
 SbWindow ApplicationX11::CreateWindow(const SbWindowOptions* options) {
   if (!EnsureX()) {
     return kSbWindowInvalid;
   }
 
   SbWindow window = new SbWindowPrivate(display_, options);
+  // TizenTube: desktop runs fullscreen by default; --no-fullscreen opts out.
+  if (!GetCommandLine()->HasSwitch("no-fullscreen")) {
+    RequestFullscreen(display_, window->window);
+  }
   windows_.push_back(window);
   if (!dev_input_) {
     // evdev input will be sent to the first created window only.
