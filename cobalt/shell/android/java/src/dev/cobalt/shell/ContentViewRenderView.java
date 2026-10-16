@@ -6,12 +6,17 @@ package dev.cobalt.shell;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 
+import org.chromium.content.browser.input.ImeAdapterImpl;
+import org.chromium.content_public.browser.ViewEventSink;
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.ui.base.WindowAndroid;
 import org.jni_zero.CalledByNative;
@@ -45,6 +50,12 @@ public class ContentViewRenderView extends FrameLayout {
      */
     public ContentViewRenderView(Context context) {
         super(context);
+
+        // TizenTube: this view is also the ViewAndroidDelegate container, so it must be
+        // focusable and act as a text editor for the Android IME (Gboard) to attach an
+        // InputConnection. Without this the soft keyboard can only send raw key events.
+        setFocusable(true);
+        setFocusableInTouchMode(true);
 
         mSurfaceBridge = createSurfaceBridge();
         mSurfaceBridge.initialize(this);
@@ -129,6 +140,57 @@ public class ContentViewRenderView extends FrameLayout {
             mWindowAndroid.onVisibilityChanged(false);
         } else if (visibility == View.VISIBLE) {
             mWindowAndroid.onVisibilityChanged(true);
+        }
+    }
+
+    // TizenTube: delegate Android IME calls to the WebContents ImeAdapter so the soft
+    // keyboard (Gboard) can commit text (capitals, Enter/Done), not just send key events.
+    private ImeAdapterImpl getImeAdapter() {
+        return mWebContents != null ? ImeAdapterImpl.fromWebContents(mWebContents) : null;
+    }
+
+    @Override
+    public boolean onCheckIsTextEditor() {
+        ImeAdapterImpl imeAdapter = getImeAdapter();
+        return imeAdapter != null && imeAdapter.onCheckIsTextEditor();
+    }
+
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        ImeAdapterImpl imeAdapter = getImeAdapter();
+        return imeAdapter != null ? imeAdapter.onCreateInputConnection(outAttrs) : null;
+    }
+
+    @Override
+    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        if (mWebContents == null) return;
+        ViewEventSink viewEventSink = ViewEventSink.from(mWebContents);
+        viewEventSink.setHideKeyboardOnBlur(true);
+        viewEventSink.onViewFocusChanged(gainFocus);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (mWebContents != null) {
+            ViewEventSink.from(mWebContents).onWindowFocusChanged(hasWindowFocus);
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mWebContents != null) {
+            ViewEventSink.from(mWebContents).onAttachedToWindow();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mWebContents != null) {
+            ViewEventSink.from(mWebContents).onDetachedFromWindow();
         }
     }
 

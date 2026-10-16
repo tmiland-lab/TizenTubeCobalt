@@ -231,7 +231,9 @@ public class Shell {
     @Initializer
     private void initFromNativeTabContents(WebContents webContents) {
         if (webContents == null || mContentViewRenderView == null) return;
-        mViewAndroidDelegate = new ShellViewAndroidDelegate(mRootView);
+        // TizenTube: use the render view (which implements the Android IME hooks) as the
+        // ViewAndroidDelegate container so the soft keyboard can attach an InputConnection.
+        mViewAndroidDelegate = new ShellViewAndroidDelegate(assumeNonNull(mContentViewRenderView));
         assert (mWebContents != webContents);
         if (mWebContents != null) mWebContents.clearNativeReference();
         webContents.setDelegates(

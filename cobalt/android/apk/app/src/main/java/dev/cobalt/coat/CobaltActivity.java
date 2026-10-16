@@ -47,6 +47,7 @@ import dev.cobalt.browser.CobaltContentBrowserClient;
 import dev.cobalt.coat.javabridge.CobaltJavaScriptAndroidObject;
 import dev.cobalt.coat.javabridge.CobaltJavaScriptInterface;
 import dev.cobalt.coat.javabridge.HTMLMediaElementExtension;
+import dev.cobalt.coat.javabridge.TizenTubeKeyboard;
 import dev.cobalt.dial.DIALServer;
 import dev.cobalt.dial.DiscoveryServer;
 import dev.cobalt.media.AudioOutputManager;
@@ -510,12 +511,18 @@ public abstract class CobaltActivity extends Activity {
     // 1. Gather all Java objects that need to be exposed to JavaScript.
     // TODO(b/379701165): consider to refine the way to add JavaScript interfaces.
     mJavaScriptAndroidObjectList.add(new HTMLMediaElementExtension(this));
+    mJavaScriptAndroidObjectList.add(new TizenTubeKeyboard(this));
 
     // 2. Use JavascriptInjector to inject Java objects into the WebContents.
     //    This makes the annotated methods in these objects accessible from JavaScript.
     JavascriptInjector javascriptInjector = JavascriptInjector.fromWebContents(webContents);
 
     javascriptInjector.setAllowInspection(true);
+    // An empty origin allowlist matches nothing (SchemeHostPortMatcher), so the
+    // objects would never be injected. Allow all origins for this first-party
+    // app shell so the TizenTube userscript can reach the Java bridge.
+    ArrayList<String> originAllowlist = new ArrayList<String>();
+    originAllowlist.add("*");
     for (CobaltJavaScriptAndroidObject javascriptAndroidObject : mJavaScriptAndroidObjectList) {
       Log.d(
           TAG,
@@ -524,7 +531,7 @@ public abstract class CobaltActivity extends Activity {
           javascriptAndroidObject,
           javascriptAndroidObject.getJavaScriptInterfaceName(),
           CobaltJavaScriptInterface.class,
-          /* originAllowlist= */ new ArrayList<String>());
+          /* originAllowlist= */ originAllowlist);
     }
   }
 
